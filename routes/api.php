@@ -13,7 +13,7 @@ Route::post('/submit', [SubmissionController::class, 'store']);
 
 Route::get('/submissions/export', [SubmissionController::class, 'exportCsv']);
 
-Route::get('/clear-submissions', function () {
-    \App\Models\Submission::truncate();
-    return 'All submissions deleted';
-});
+// Route::get('/clear-submissions', function () {
+//     \App\Models\Submission::truncate();
+//     return 'All submissions deleted';
+// });
