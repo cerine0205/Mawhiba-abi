@@ -23,8 +23,14 @@ class SubmissionController extends Controller
     }
 
 
-public function exportCsv()
+public function exportCsv(Request $request)
 {
+    //  حماية الرابط برمز بسيط
+    $key = $request->query('key');
+    if (!$key || $key !== env('EXPORT_KEY')) {
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
     $rows = Submission::latest()->get();
 
     $fileName = 'submissions_' . now()->format('Y-m-d_H-i') . '.csv';
@@ -37,14 +43,11 @@ public function exportCsv()
     $callback = function () use ($rows) {
         $out = fopen('php://output', 'w');
 
-        //  BOM عشان Excel يقرا العربي مضبوط
         fwrite($out, "\xEF\xBB\xBF");
 
-        // Header row
         fputcsv($out, ['ID', 'الاسم الكامل', 'الرقم الجامعي', 'رقم الجوال', 'الإجابات', 'تاريخ الإرسال']);
 
         foreach ($rows as $r) {
-            // answers غالبًا array بسبب casts
             $answersText = is_array($r->answers)
                 ? json_encode($r->answers, JSON_UNESCAPED_UNICODE)
                 : (string) $r->answers;
@@ -63,6 +66,5 @@ public function exportCsv()
     };
 
     return response()->stream($callback, 200, $headers);
-}
 
 }
